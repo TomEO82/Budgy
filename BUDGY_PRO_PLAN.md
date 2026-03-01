@@ -40,17 +40,28 @@ Minimum features to transform Budgy from a calculator into a usable budget manag
 
 #### 1.1.3 Income Configuration
 - Builds on existing `SalaryInput.jsx`
-- Net monthly salary per person
+- **Default monthly salary** per person (used as pre-fill for monthly prompts)
 - Pay frequency option (monthly, bi-weekly, weekly) with auto-normalization to monthly
 - Income saved persistently and editable from settings
 
-#### 1.1.4 Budget Ratio Configuration
+#### 1.1.4 Monthly Salary Entry Prompt
+Designed for workers with variable monthly income (e.g., hourly workers whose pay depends on hours worked that month).
+- **Recurring prompt**: at the start of each budget period, the app prompts the user to enter that month's actual salary
+- **Configurable prompt date**: choose when the prompt appears — **1st of the month**, **10th of the month** (common Israeli pay dates), or a **custom date** — set during onboarding and changeable in settings
+- **Pre-filled with last month's salary**: for quick confirmation if income hasn't changed — just tap "Confirm" or adjust the number
+- **Dual mode**: prompts for both people's salaries (each can confirm/update independently)
+- **Dismissible**: can be snoozed or skipped — salary can always be entered/updated later from settings or the dashboard
+- **Per-month income history**: each month stores its own actual income, so budget calculations always reflect real earnings — not a static estimate
+- **Dashboard reminder**: if salary hasn't been entered for the current period, show a gentle banner on the dashboard ("Enter this month's salary to see your budget")
+- Budget category amounts (Essentials/Lifestyle/Savings) automatically recalculate when the month's salary is entered or updated
+
+#### 1.1.5 Budget Ratio Configuration
 - Builds on existing `RatioSettings.jsx`
 - Essentials/Lifestyle/Savings percentages (default 50/30/20)
 - Must sum to 100% (existing validation)
 - Saved persistently
 
-#### 1.1.5 Budget Period
+#### 1.1.6 Budget Period
 - Monthly by default (calendar month: 1st to end of month)
 - Option to set a custom cycle start date (e.g., "15th to 14th") to align with pay dates - common in Israel where salaries arrive around the 9th-10th
 
@@ -240,7 +251,9 @@ Bottom nav bar (mobile-first):
 ### 1.9 Settings
 
 #### 1.9.1 Household Settings
-- Switch solo/dual mode, edit person names/avatars, edit income, change budget period start date
+- Switch solo/dual mode, edit person names/avatars, edit default income, change budget period start date
+- **Salary prompt date**: change when the monthly salary entry prompt appears (1st, 10th, or custom day)
+- **Edit current month's salary**: manually update this month's income at any time
 
 #### 1.9.2 Budget Settings
 - Edit 50/30/20 ratios, change split method for shared expenses
@@ -297,8 +310,8 @@ Bottom nav bar (mobile-first):
 - Calendar or timeline showing when recurring payments are due in coming days/weeks
 
 #### 2.2.3 Recurring Income
-- Mark income as recurring (salary, freelance retainers)
-- Useful for freelancers with variable income
+- ~~Moved to Tier 1 (section 1.1.4)~~ — monthly salary entry prompt now handles variable income natively
+- For freelancers with multiple income sources: ability to add additional one-off income entries for a given month (e.g., freelance gig, side project payment)
 
 ---
 
@@ -465,7 +478,8 @@ Core entities the developer should design around:
 | Entity | Key Fields |
 |---|---|
 | **Household** | mode (solo/dual), person names/avatars, split method preference |
-| **Income** | per-person monthly net income, pay frequency |
+| **Income** | per-person default monthly net income, pay frequency, salary prompt date (1st/10th/custom) |
+| **Monthly Income Entry** | budget period (month/year), per-person actual income for that period, entry date, confirmed flag |
 | **Budget Config** | ratios (needs/wants/savings %), period start day, rollover preferences |
 | **Category** | fixed three (essentials/lifestyle/savings), customizable display names |
 | **Subcategory** | belongs to category, name + emoji, user-orderable, archivable |
