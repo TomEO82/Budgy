@@ -112,11 +112,15 @@ Current app hardcodes subcategories as display-only pills. These become function
   - **Date** - defaults to today, can be backdated
   - **Note/description** (optional) - free text
   - **Recurring flag** - "Make this recurring" toggle (see section 1.4)
+  - **Installments** (תשלומים) - "Pay in installments" toggle (see section 1.3.5). When enabled:
+    - **Number of payments** - quick picks (3, 6, 12) or custom number
+    - **First payment month** - defaults to the **following month** (Israeli convention), optionally changeable to current month
+    - Total amount entered is the full purchase price; per-payment amount auto-calculated (total ÷ number of payments)
 - **Quick-add mode**: simplified flow - just amount, category, who paid. Subcategory and note can be added later
 
 #### 1.3.2 Expense List View
 - Chronological list of all expenses for the current budget period
-- Each row: date, amount, subcategory icon + name, who-paid indicator (person color/avatar), note preview
+- Each row: date, amount, subcategory icon + name, who-paid indicator (person color/avatar), note preview, installment badge if applicable (e.g., "3/12")
 - **Filter by**: category, subcategory, person, date range
 - **Sort by**: date (newest/oldest), amount (highest/lowest)
 - **Search**: free text across notes and subcategory names
@@ -131,6 +135,25 @@ Current app hardcodes subcategories as display-only pills. These become function
 - Amount must be positive and non-zero
 - Date cannot be in the future (or optionally allow scheduled future expenses)
 - Warn (don't block) if expense pushes a category over budget
+
+#### 1.3.5 Installment Payments (תשלומים)
+Common in Israel — large purchases (electronics, furniture, appliances) are often split into monthly credit card installments. The first payment is typically charged the **following month**.
+
+- When a user toggles "Pay in installments" during expense entry, the app creates an **installment plan** that auto-generates one expense instance per month for the duration of the payments
+- **First payment defaults to the month after the purchase date** (Israeli convention); can be changed to current month if needed
+- Each generated instance:
+  - Shows the per-payment amount (total ÷ number of payments)
+  - Is tagged with a payment indicator: **"Payment 3/12"** (תשלום 3 מתוך 12)
+  - Is linked back to the original purchase (tap to see full purchase details: total amount, purchase date, store/note, remaining payments)
+  - Appears as a regular expense in that month's budget, counted against the category budget
+  - Is visually distinguished with an installment badge/icon (similar to recurring expenses)
+- **Monthly budget impact**: only the current month's installment amount counts toward that month's spending — not the full purchase price
+- **Installment management** (accessible from expense detail or a dedicated view):
+  - View all active installment plans with progress (e.g., "4 of 12 payments completed")
+  - Edit the original purchase: changing total amount or number of remaining payments recalculates future installments
+  - **Pay off early**: mark remaining installments as paid, canceling future auto-generated instances
+  - Cancel/delete an installment plan (with confirmation)
+- Installment instances that haven't occurred yet are **not editable individually** — changes flow from the installment plan. Past instances (already logged) can be adjusted if needed (e.g., amount correction)
 
 ---
 
@@ -212,7 +235,8 @@ Replaces the current single-view calculator.
 - Total income vs. total spending for the month
 - "Add Expense" quick-access button
 - In dual mode: settlement balance card ("Omer owes Shira 340 NIS")
-- Recent expenses: last 3-5 entries
+- Recent expenses: last 3-5 entries (installment expenses show their payment indicator, e.g., "3/12")
+- Active installment plans: if any installments are in progress, the monthly installment amounts are included in category spending totals
 
 #### 1.6.2 Category Detail View
 - Tap a category card to drill down:
@@ -488,7 +512,8 @@ Core entities the developer should design around:
 | **Budget Config** | ratios (needs/wants/savings %), period start day, rollover preferences |
 | **Category** | fixed three (essentials/lifestyle/savings), customizable display names |
 | **Subcategory** | belongs to category, name + emoji, user-orderable, archivable |
-| **Expense** | amount, date, category, subcategory, who-paid, shared/personal, split details, note, recurring-instance flag, link to recurring template |
+| **Expense** | amount, date, category, subcategory, who-paid, shared/personal, split details, note, recurring-instance flag, link to recurring template, installment-instance flag, link to installment plan, payment number (X of Y) |
+| **Installment Plan** | purchase date, total amount, number of payments, per-payment amount, first payment month, category, subcategory, who-paid, note, payments completed count, active/paid-off/cancelled |
 | **Recurring Template** | amount, frequency, day-of-month/week, start/end date, category, subcategory, who-pays, active/paused |
 | **Settlement Event** | date, amount, from-person, to-person, note |
 | **Budget Period Snapshot** | archived monthly data for historical views |
@@ -524,4 +549,5 @@ To validate the completed app:
 5. **Budget tracking**: verify progress bars and remaining amounts update correctly as expenses are added
 6. **Persistence**: refresh the page and verify all data survives
 7. **Navigation**: verify all tabs/routes work, browser back/forward functions correctly
-8. **Edge cases**: zero income, 100% in one ratio category, both people paying for same split expense, deleting the only expense in a category
+8. **Installment payments**: create an installment purchase (e.g., 6,000 NIS in 12 payments), verify first payment instance appears in the following month (not the purchase month), verify each month shows correct payment number (e.g., "3/12"), verify only the per-payment amount (500 NIS) counts toward that month's budget, verify paying off early cancels remaining instances
+9. **Edge cases**: zero income, 100% in one ratio category, both people paying for same split expense, deleting the only expense in a category
